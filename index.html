@@ -3,11 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>The Roast Game</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        #messageBox { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-top: 10px; }
+        input { width: 70%; padding: 10px; }
+        button { padding: 10px; }
+    </style>
 </head>
 <body>
-    <input type="text" name="" id="inputBox" placeholder="Enter your best joke"><button id="send">send</button><p>health - <b id="health"></b></p><p>rage - <b id="rage"></b></p><br>
-    <p id="messageBox"></p>
+    <h1>🔥 Roast Battle</h1>
+    <div>
+        HP: <b id="health">100</b> | Rage: <b id="rage">0</b>
+    </div>
+    
+    <div id="messageBox"></div>
+
+    <div style="margin-top: 10px;">
+        <input type="text" id="inputBox" placeholder="Tell a joke...">
+        <button id="send">Send</button>
+    </div>
 
     <script src="main.js" type="module"></script>
 </body>
