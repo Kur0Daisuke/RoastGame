@@ -18,32 +18,27 @@ rageBox.innerText = rage;
  */
 async function sendRoastToBackend(userJoke) {
     try {
-        // We call our OWN internal API, not Hugging Face directly.
-        // This solves the CORS issue!
         const response = await fetch("/api/roast", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-                userJoke: userJoke,
-                health: health,
-                rage: rage 
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userJoke, health, rage }),
         });
 
-        if (!response.ok) throw new Error("Backend failed");
-
         const data = await response.json();
-        
-        // Vercel returns the Hugging Face structure
-        const aiResponse = data.choices[0].message.content;
-        console.log("AI Response:", aiResponse);
-        return aiResponse;
+        console.log("Full Data from Backend:", data);
+
+        // SAFETY CHECK: Make sure 'choices' and 'message' exist
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+            return data.choices[0].message.content;
+        } else {
+            // If Hugging Face is loading or threw an error
+            console.error("AI Response Error:", data);
+            return "My brain just glitched. Try again. d:{\"damage_taken\": 0, \"rage_increase\": 0}";
+        }
 
     } catch (error) {
         console.error("Connection Error:", error);
-        return "I'm too busy laughing at your internet connection to reply. d:{\"damage_taken\": 0, \"rage_increase\": 0}";
+        return "Connection lost! d:{\"damage_taken\": 0, \"rage_increase\": 0}";
     }
 }
 
