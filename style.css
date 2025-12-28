@@ -1,0 +1,39 @@
+body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+#messageBox { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-top: 10px; }
+input { width: 70%; padding: 10px; }
+button { padding: 10px; }
+
+#ai-container {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 80px;
+    margin-bottom: 20px;
+}
+
+/* Default breathing animation */
+#ai-character {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    animation: breathe 3s infinite ease-in-out;
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* The "Talk/Attack" movement */
+.ai-talking {
+    animation: shake 0.5s infinite !important;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    50% { transform: translate(-1px, 2px) rotate(1deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+

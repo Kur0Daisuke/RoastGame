@@ -1,46 +1,40 @@
-// Make sure "async" is present before (req, res)
-export default async function handler(req, res) {
-    // 1. Setup CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+const express = require('express');
+const cors = require('cors');
+const Groq = require('groq-sdk');
+const app = express();
+require("dotenv").config()
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public')); // Serves your HTML/JS
+
+app.post('/api/roast', async (req, res) => {
+    const userJoke = req.body.message;
 
     try {
-        const { userJoke, health, rage } = req.body || {};
-
-        if (!process.env.HF_TOKEN) {
-            return res.status(500).json({ error: "HF_TOKEN is missing in Vercel settings" });
-        }
-
-        // Now 'await' will work because the function is 'async'
-        const response = await fetch("https://router.huggingface.co/hf-inference/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.HF_TOKEN.trim()}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                model: "meta-llama/Llama-3.1-8B-Instruct",
-                messages: [
-                    { role: "system", content: "You are a savage roast master. End with d:{\"damage_taken\": 10, \"rage_increase\": 5}" },
-                    { role: "user", content: `Joke: ${userJoke}. HP: ${health}. Rage: ${rage}` }
-                ],
-                max_tokens: 100,
-            }),
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.1-8b-instant",
+            response_format: { type: "json_object" },
+            messages: [
+                { 
+                    role: "system", 
+                    content: `You are an AI Boss in a Roast Battle.
+                    Rules:
+                    1. decide the hploss and rageGain depending on the user's joke. if its hurting you alot then lose health and if it angers you rage gain
+                    2. the more rage the more you say violent jokes
+                    3. only lose health if the joke is actually funny or damaging
+                    4. Respond in JSON: {"reply": "...", "hpLoss": 0, "rageGain": 0}` 
+                },
+                { role: "user", content: userJoke }
+            ],
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            return res.status(response.status).json({ error: "HF_API_ERROR", details: data });
-        }
-
-        return res.status(200).json(data);
-
+        const gameData = JSON.parse(completion.choices[0].message.content);
+        res.json(gameData);
     } catch (error) {
-        console.error("CRASH:", error.message);
-        return res.status(500).json({ error: "Backend Crash", message: error.message });
+        res.status(500).json({ reply: "I'm not even phased.", hpLoss: 0, rageGain: 10 });
     }
-}
+});
+
+app.listen(3000, () => console.log("Game live at http://localhost:3000"));

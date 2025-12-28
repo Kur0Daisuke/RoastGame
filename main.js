@@ -1,59 +1,70 @@
-const msgBox = document.getElementById("messageBox");
-const inBox = document.getElementById("inputBox");
-const sendBtn = document.getElementById("send");
-const healthBox = document.getElementById("health");
-const rageBox = document.getElementById("rage");
+const inputBox = document.getElementById('inputBox');
+const sendBtn = document.getElementById('send');
+const messageBox = document.getElementById('messageBox');
+const healthEl = document.getElementById('health');
+const rageEl = document.getElementById('rage');
 
-let health = 100;
-let rage = 0;
+// Assuming these are the AI's stats
+let aiHealth = 100;
+let aiRage = 0;
 
-// Update UI
-healthBox.innerText = health;
-rageBox.innerText = rage;
+// --- ALL YOUR FETCH LOGIC ABOVE ---
 
-async function sendRoast() {
-    const joke = inBox.value.trim();
-    if (!joke) return;
+// ADD THIS AT THE BOTTOM OF main.js
+function appendMessage(sender, text) {
+    const messageBox = document.getElementById('messageBox');
+    
+    // Create a new div for the message
+    const div = document.createElement('div');
+    div.style.marginBottom = "10px";
+    
+    // Set the content (Example: You: Hello)
+    div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    
+    // Add it to the box
+    messageBox.appendChild(div);
+    
+    // Auto-scroll to the bottom
+    messageBox.scrollTop = messageBox.scrollHeight;
+}
 
-    // Loading State
-    sendBtn.disabled = true;
-    msgBox.innerHTML += `<p style="color: blue;"><b>You:</b> ${joke}</p>`;
-    inBox.value = "";
+sendBtn.addEventListener('click', async () => {
+    const text = inputBox.value;
+    if (!text) return;
+
+    appendMessage("You", text);
+    inputBox.value = "";
 
     try {
-        const response = await fetch("/api/roast", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userJoke: joke, health, rage })
+        const response = await fetch('http://localhost:3000/api/roast', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
         });
 
         const data = await response.json();
 
-        if (data.choices && data.choices[0]) {
-            const fullText = data.choices[0].message.content;
-            
-            // Parse the "d:" part
-            const parts = fullText.split("d:");
-            const insult = parts[0];
-            const stats = JSON.parse(parts[1] || '{"damage_taken":0, "rage_increase":0}');
+        // The AI responds and reports how much it was "hurt"
+        appendMessage("AI Boss", data.reply);
+        
+        aiHealth -= data.hpLoss;
+        aiRage += data.rageGain;
 
-            // Update Logic
-            health -= stats.damage_taken;
-            rage += stats.rage_increase;
+        // Update UI
+        document.getElementById('health').innerText = Math.max(0, aiHealth);
+        document.getElementById('rage').innerText = aiRage;
 
-            // Update UI
-            healthBox.innerText = Math.max(0, health);
-            rageBox.innerText = rage;
-            msgBox.innerHTML += `<p><b>Bot:</b> ${insult}</p><hr>`;
-        } else {
-            msgBox.innerHTML += `<p style="color: red;">Error: ${data.error || "Unknown AI error"}</p>`;
+        if (aiHealth <= 0) {
+            appendMessage("SYSTEM", "🏆 VICTORY! You roasted the AI into retirement.");
+            sendBtn.disabled = true;
         }
+        
+        if (aiRage >= 100) {
+            appendMessage("🔥 BOSS RAGE", "The AI is furious! Its next roasts will be double-damage!");
+            // You could add a screen shake effect here!
+        }
+
     } catch (err) {
-        msgBox.innerHTML += `<p style="color: red;">Connection Error. Check Console.</p>`;
         console.error(err);
     }
-
-    sendBtn.disabled = false;
-}
-
-sendBtn.addEventListener("click", sendRoast);
+});

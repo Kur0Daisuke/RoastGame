@@ -1,0 +1,26 @@
+{
+  "name": "roastapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kur0Daisuke/RoastGame.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kur0Daisuke/RoastGame/issues"
+  },
+  "homepage": "https://github.com/Kur0Daisuke/RoastGame#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "groq-sdk": "^0.37.0"
+  }
+}
