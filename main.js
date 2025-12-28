@@ -36,7 +36,7 @@ sendBtn.addEventListener('click', async () => {
     inputBox.value = "";
 
     try {
-        const response = await fetch('http://localhost:3000/api/roast', {
+        const response = await fetch('/api/roast', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text })
